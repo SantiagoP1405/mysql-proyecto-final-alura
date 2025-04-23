@@ -27,15 +27,41 @@ SET vitems = f_aleatorio(1, maxitems);
 WHILE vcontador <= vitems
 DO
 SET vproducto = f_producto_aleatorio();
-SET vcantidad = faleatorio(1, maxcantidad);
+SET vcantidad = f_aleatorio(1, maxcant);
 SELECT PRECIO INTO vprecio FROM productos WHERE CODIGO = vproducto;
-INSERT INTO items(NUMMERO, CODIGO, CANTIDAD, PRECIO)
-VALUES(vnfactura, vproducto, vcaantidad, vprecio);
+INSERT INTO items(NUMERO, CODIGO, CANTIDAD, PRECIO)
+VALUES(vnfactura, vproducto, vcantidad, vprecio);
 SET vcontador = vcontador +1;
 END WHILE;
 END$$
 
 DELIMITER ;
 
-CALL sp_venta(20250423, 15, 100);
+CALL sp_venta('20250423', 3, 100);
 
+CREATE TABLE facturas(
+NUMERO INT NOT NULL,
+FECHA DATE,
+DNI VARCHAR(11) NOT NULL, 
+MATRICULA VARCHAR(5) NOT NULL,
+IMPUESTO FLOAT,
+PRIMARY KEY (NUMERO),
+FOREIGN KEY (DNI) REFERENCES clientes(DNI),
+FOREIGN KEY (MATRICULA) REFERENCES vendedores(MATRICULA)
+);
+
+DROP TABLE items;
+CREATE TABLE items(
+NUMERO INT NOT NULL,
+CODIGO VARCHAR(10) NOT NULL,
+CANTIDAD INT,
+PRECIO FLOAT,
+PRIMARY KEY (NUMERO, CODIGO),
+FOREIGN KEY (NUMERO) REFERENCES facturas(NUMERO),
+FOREIGN KEY (CODIGO) REFERENCES productos(CODIGO)
+);
+
+
+INSERT INTO items SELECT NUMERO, CODIGO_DEL_PRODUCTO AS CODIGO, CANTIDAD, PRECIO FROM jugos_ventas.items_facturas;
+
+INSERT INTO facturas SELECT NUMERO, FECHA_VENTA AS FECHA, DNI, MATRICULA, IMPUESTO FROM jugos_ventas.facturas;
