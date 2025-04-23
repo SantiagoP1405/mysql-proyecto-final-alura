@@ -18,6 +18,7 @@ DECLARE vprecio FLOAT;
 DECLARE vitems INT;
 DECLARE vnfactura INT;
 DECLARE vcontador INT DEFAULT 1;
+DECLARE vnumeroitems INT;
 SELECT MAX(NUMERO) + 1 INTO vnfactura FROM facturas;
 SET vcliente = f_cliente_aleatorio();
 SET vvendedor = f_vendedor_aleatorio();
@@ -27,17 +28,21 @@ SET vitems = f_aleatorio(1, maxitems);
 WHILE vcontador <= vitems
 DO
 SET vproducto = f_producto_aleatorio();
-SET vcantidad = f_aleatorio(1, maxcant);
-SELECT PRECIO INTO vprecio FROM productos WHERE CODIGO = vproducto;
+SELECT COUNT(*) INTO vnumeroitems FROM items
+WHERE CODIGO = vproducto AND NUMERO = vnfactura;
+IF vnumeroitems = 0 THEN
+	SET vcantidad = f_aleatorio(1, maxcant);
+	SELECT PRECIO INTO vprecio FROM productos WHERE CODIGO = vproducto;
 INSERT INTO items(NUMERO, CODIGO, CANTIDAD, PRECIO)
 VALUES(vnfactura, vproducto, vcantidad, vprecio);
+END IF;
 SET vcontador = vcontador +1;
 END WHILE;
 END$$
 
 DELIMITER ;
 
-CALL sp_venta('20250423', 3, 100);
+CALL sp_venta('20250423', 1000, 100);
 
 CREATE TABLE facturas(
 NUMERO INT NOT NULL,
